@@ -1,0 +1,23 @@
+enum ERole {
+  User
+  Admin
+  Staff
+  Store_Manager
+}
+
+enum ETask_Progress {
+  Confirmed
+  Need_Stuff
+  Need_Human_Attention
+}
+
+enum EBooking_Type {
+  New
+  Existing
+  Urgent
+}
+
+enum EBooking_Info {
+  Confirmed
+  Decline
+}
