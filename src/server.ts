@@ -2,6 +2,7 @@ import { Server } from "http";
 import app from "./app";
 import config from "./app/config";
 import { prisma } from "./app/db_connection";
+import { connectRedis } from "./app/config/redis.config";
 
 let server: Server;
 
@@ -21,7 +22,10 @@ const startServer = async () => {
 };
 
 // Start server
-startServer();
+(async()=>{
+  await connectRedis();
+  await startServer();
+})()
 
 process.on("unhandledRejection", async (err) => {
   console.error("Unhandled Rejection Detected... server shutting down...", err);

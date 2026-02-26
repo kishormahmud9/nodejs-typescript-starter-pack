@@ -47,8 +47,35 @@ const userLogout = catchAsync(async(req,res,next)=>{
   })
 })
 
+const userForgotPassword = catchAsync(async(req,res,next)=>{
+  const {email} = req.body;
+  await authServices.forgotPassword_sendPassword(email);
+  sendResponse(res,{
+    success:true,
+    message:"Password reset email sent successfully",
+    statusCode:200,
+    data:null,
+  })
+})
+
+
+const userVerifyOTP = catchAsync(async(req,res,next)=>{
+  const {email,otp} = req.body;
+  const isOTPValid = await authServices.verifyOTP(email,otp);
+  sendResponse(res,{
+    success:true,
+    message:"OTP verified successfully",
+    statusCode:200,
+    data:isOTPValid,
+  })
+})
+
+
+
 export const authControllers = {
   userLogin,
   userRegister,
   userLogout,
+  userForgotPassword,
+  userVerifyOTP
 }
