@@ -127,4 +127,45 @@ const verifyOTP = async (email: string, otp: string) => {
 
 };
 
-export const authServices = { loginUser, registerUser,forgotPassword_sendPassword,verifyOTP };
+
+const changePassword = async (
+ 
+  newPassword: string,
+  email: string
+) => {
+  // 1️⃣ Find user
+  const user = await db.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+
+
+  if (!newPassword) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      "New password is not found"
+    );
+  }
+
+  // 3️⃣ Hash new password
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  // 4️⃣ Update password using Prisma
+ await db.user.update({
+    where: { email },
+    data: {
+      password: hashedPassword,
+    },
+  });
+
+  return {
+    success: true,
+    message: "Password changed successfully",
+  };
+};
+
+export const authServices = { loginUser, registerUser,forgotPassword_sendPassword,verifyOTP,changePassword };

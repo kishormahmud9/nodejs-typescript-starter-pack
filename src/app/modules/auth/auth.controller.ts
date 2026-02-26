@@ -70,6 +70,18 @@ const userVerifyOTP = catchAsync(async(req,res,next)=>{
   })
 })
 
+const userChangePassword = catchAsync(async(req,res,next)=>{
+  const {newPassword} = req.body;
+  const email = req?.body?.email as string;
+  await authServices.changePassword(newPassword,email);
+  sendResponse(res,{
+    success:true,
+    message:"Password changed successfully",
+    statusCode:200,
+    data:null,
+  })
+})
+
 
 
 export const authControllers = {
@@ -77,5 +89,6 @@ export const authControllers = {
   userRegister,
   userLogout,
   userForgotPassword,
-  userVerifyOTP
+  userVerifyOTP,
+  userChangePassword,
 }
