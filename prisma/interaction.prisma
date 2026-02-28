@@ -1,0 +1,22 @@
+model Interaction {
+  id            String               @id @default(uuid())
+  interactionId String               @unique
+  category      EInteractionCategory
+  type          EInteractionType
+  date          DateTime             @default(now())
+  progress      ETask_Progress       @default(Confirmed)
+  bookingType   EBooking_Type?
+  bookingStatus EBooking_Info?
+  duration      String?
+  transcript    String?              @db.Text
+  audioUrl      String?
+  subject       String?
+  message       String?              @db.Text
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+}

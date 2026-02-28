@@ -4,10 +4,8 @@ import bcrypt from "bcrypt";
 import httpStatus from "http-status";
 import ApiError from "../../errors/ApiError";
 import { sendEmail } from "../../utils/sendEmail";
-import config from "../../config";
-import crypto from "crypto"
+import crypto from "crypto";
 import { redisClient } from "../../config/redis.config";
-
 
 const db = prisma as any;
 
@@ -29,7 +27,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid credentials");
   }
 
-  return user
+  return user;
 };
 
 const registerUser = async (payload: {
@@ -58,81 +56,72 @@ const registerUser = async (payload: {
     },
   });
 
- return created
+  return created;
 };
 
 // Forget Password
 
 const generateOtp = (length = 6) => {
-    const otp = crypto.randomInt(10 ** (length - 1), 10 ** length).toString()
-    return otp
-}
-
-const forgotPassword_sendPassword = async (email: string) => {
-    const isUserExist = await db.user.findUnique({
-    where: { email: email },
-   
-  });
-
-    if (!isUserExist) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "User does not exist")
-    }
-
-     const otp = generateOtp();
-
-    const redisKey = `otp:${email}`
-
-    await redisClient.set(redisKey, otp, {
-        expiration: {
-            type: "EX",
-            value: 2*60
-        }
-    })
-
-    await sendEmail({
-        to: email,
-        subject: "Your OTP Code",
-        tempName: "otp",
-        tempData: {
-            name: isUserExist.name,
-            otp: otp
-        }
-    })
-   
-}
-
-const verifyOTP = async (email: string, otp: string) => {
-    const user =await db.user.findUnique({
-    where: { email: email },
-   
-  });
-
-    if (!user) {
-        throw new ApiError(404, "User not found")
-    }
-
-    const redisKey = `otp:${email}`
-
-    const savedOtp = await redisClient.get(redisKey)
-
-    if (!savedOtp) {
-        throw new ApiError(401, "Invalid OTP");
-    }
-
-    if (savedOtp !== otp) {
-        throw new ApiError(401, "Invalid OTP");
-    }
-
-  return {isOTPValid:true}
-
+  const otp = crypto.randomInt(10 ** (length - 1), 10 ** length).toString();
+  return otp;
 };
 
+const forgotPassword_sendPassword = async (email: string) => {
+  const isUserExist = await db.user.findUnique({
+    where: { email: email },
+  });
 
-const changePassword = async (
- 
-  newPassword: string,
-  email: string
-) => {
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User does not exist");
+  }
+
+  const otp = generateOtp();
+
+  const redisKey = `otp:${email}`;
+
+  await redisClient.set(redisKey, otp, {
+    expiration: {
+      type: "EX",
+      value: 2 * 60,
+    },
+  });
+
+  await sendEmail({
+    to: email,
+    subject: "Your OTP Code",
+    tempName: "otp",
+    tempData: {
+      name: isUserExist.name,
+      otp: otp,
+    },
+  });
+};
+
+const verifyOTP = async (email: string, otp: string) => {
+  const user = await db.user.findUnique({
+    where: { email: email },
+  });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const redisKey = `otp:${email}`;
+
+  const savedOtp = await redisClient.get(redisKey);
+
+  if (!savedOtp) {
+    throw new ApiError(401, "Invalid OTP");
+  }
+
+  if (savedOtp !== otp) {
+    throw new ApiError(401, "Invalid OTP");
+  }
+
+  return { isOTPValid: true };
+};
+
+const changePassword = async (newPassword: string, email: string) => {
   // 1️⃣ Find user
   const user = await db.user.findUnique({
     where: { email },
@@ -142,20 +131,15 @@ const changePassword = async (
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-
-
   if (!newPassword) {
-    throw new ApiError(
-      httpStatus.UNAUTHORIZED,
-      "New password is not found"
-    );
+    throw new ApiError(httpStatus.UNAUTHORIZED, "New password is not found");
   }
 
   // 3️⃣ Hash new password
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   // 4️⃣ Update password using Prisma
- await db.user.update({
+  await db.user.update({
     where: { email },
     data: {
       password: hashedPassword,
@@ -168,4 +152,10 @@ const changePassword = async (
   };
 };
 
-export const authServices = { loginUser, registerUser,forgotPassword_sendPassword,verifyOTP,changePassword };
+export const authServices = {
+  loginUser,
+  registerUser,
+  forgotPassword_sendPassword,
+  verifyOTP,
+  changePassword,
+};

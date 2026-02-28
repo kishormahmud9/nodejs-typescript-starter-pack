@@ -1,0 +1,13 @@
+model Employee {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  phone        String?
+  position     String?
+  department   String?
+  status       EStatus       @default(Active)
+  avatar       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  interactions Interaction[]
+}

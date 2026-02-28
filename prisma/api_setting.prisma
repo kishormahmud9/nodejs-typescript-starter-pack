@@ -1,0 +1,9 @@
+model APISetting {
+  id        String   @id @default(uuid())
+  label     String
+  apiName   String
+  apiKey    String
+  status    EStatus  @default(Active)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
