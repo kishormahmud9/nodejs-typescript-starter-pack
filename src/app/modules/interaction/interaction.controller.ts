@@ -52,10 +52,32 @@ const deleteInteraction = catchAsync(async (req, res) => {
     });
 });
 
+const confirmBooking = catchAsync(async (req, res) => {
+    const result = await interactionServices.confirmBooking(req.params.id as string);
+    sendResponse(res, {
+        success: true,
+        message: "Booking confirmed successfully",
+        statusCode: 200,
+        data: result,
+    });
+});
+
+const declineBooking = catchAsync(async (req, res) => {
+    const result = await interactionServices.declineBooking(req.params.id as string);
+    sendResponse(res, {
+        success: true,
+        message: "Booking declined successfully",
+        statusCode: 200,
+        data: result,
+    });
+});
+
 export const interactionControllers = {
     createInteraction,
     getAllInteractions,
     getInteractionById,
     updateInteraction,
     deleteInteraction,
+    confirmBooking,
+    declineBooking
 };

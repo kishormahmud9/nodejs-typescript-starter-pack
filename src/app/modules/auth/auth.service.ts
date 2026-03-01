@@ -30,33 +30,110 @@ const loginUser = async (payload: { email: string; password: string }) => {
   return user;
 };
 
-const registerUser = async (payload: {
+const registerCustomer = async (payload: {
   name: string;
   email: string;
   password: string;
   contactNo: string;
+ 
 }) => {
-  const existing = await db.user.findUnique({
-    where: { email: payload.email },
-    select: { id: true },
+  const result = await prisma.$transaction(async (tx) => {
+    const existingUser = await tx.user.findUnique({
+      where: { email: payload.email },
+      select: { id: true },
+    });
+    if (existingUser) {
+      throw new ApiError(httpStatus.CONFLICT, "User email already exists");
+    }
+
+    const existingCustomer = await tx.customer.findUnique({
+      where: { email: payload.email },
+      select: { id: true },
+    });
+    if (existingCustomer) {
+      throw new ApiError(httpStatus.CONFLICT, "Customer email already exists");
+    }
+
+    const hashed = await bcrypt.hash(payload.password, 8);
+
+    const user = await tx.user.create({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        password: hashed,
+        contactNo: payload.contactNo,
+        isBlocked: false,
+      },
+    });
+
+    const customer = await tx.customer.create({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        contactNumber:  payload.contactNo,
+      },
+    });
+
+    return { user, customer };
   });
-  if (existing) {
-    throw new ApiError(httpStatus.CONFLICT, "Email already exists");
-  }
 
-  const hashed = await bcrypt.hash(payload.password, 8);
+  return result;
+};
 
-  const created = await db.user.create({
-    data: {
-      name: payload.name,
-      email: payload.email,
-      password: hashed,
-      contactNo: payload.contactNo,
-      isBlocked: false,
-    },
+
+const registerEmployee = async (payload: {
+  name: string;
+  email: string;
+  password: string;
+  contactNo: string;
+  position?: string;
+  department?: string;
+  avatar?: string;
+}) => {
+  const result = await prisma.$transaction(async (tx) => {
+    const existingUser = await tx.user.findUnique({
+      where: { email: payload.email },
+      select: { id: true },
+    });
+    if (existingUser) {
+      throw new ApiError(httpStatus.CONFLICT, "User email already exists");
+    }
+
+    const existingEmployee = await tx.employee.findUnique({
+      where: { email: payload.email },
+      select: { id: true },
+    });
+    if (existingEmployee) {
+      throw new ApiError(httpStatus.CONFLICT, "Employee email already exists");
+    }
+
+    const hashed = await bcrypt.hash(payload.password, 8);
+
+    const user = await tx.user.create({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        password: hashed,
+        contactNo: payload.contactNo,
+        isBlocked: false,
+      },
+    });
+
+    const employee = await tx.employee.create({
+      data: {
+        name: payload.name,
+        email: payload.email,
+        phone:  payload.contactNo,
+        position: payload.position,
+        department: payload.department,
+        avatar: payload.avatar,
+      },
+    });
+
+    return { user, employee };
   });
 
-  return created;
+  return result;
 };
 
 // Forget Password
@@ -154,7 +231,8 @@ const changePassword = async (newPassword: string, email: string) => {
 
 export const authServices = {
   loginUser,
-  registerUser,
+  registerCustomer,
+  registerEmployee,
   forgotPassword_sendPassword,
   verifyOTP,
   changePassword,

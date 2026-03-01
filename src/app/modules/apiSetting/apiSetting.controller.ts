@@ -13,7 +13,7 @@ const createAPISetting = catchAsync(async (req, res) => {
 });
 
 const getAllAPISettings = catchAsync(async (req, res) => {
-    const result = await apiSettingServices.getAllAPISettings();
+    const result = await apiSettingServices.getAllAPISettings(req.query);
     sendResponse(res, {
         success: true,
         message: "API Settings fetched successfully",

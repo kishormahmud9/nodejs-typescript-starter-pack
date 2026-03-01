@@ -17,14 +17,25 @@ const userLogin = catchAsync(async(req,res,next)=>{
    })
 })
 
-const userRegister = catchAsync(async(req,res,next)=>{
+const createCustomer = catchAsync(async(req,res,next)=>{
   const payload = req.body;
-  const user = await authServices.registerUser(payload);
+  const result = await authServices.registerCustomer(payload);
   sendResponse(res,{
     success:true,
-    message:"User registered successfully",
+    message:"Customer registered successfully",
     statusCode:201,
-    data:user,
+    data:result,
+  })
+})
+
+const createEmployee = catchAsync(async(req,res,next)=>{
+  const payload = req.body;
+  const result = await authServices.registerEmployee(payload);
+  sendResponse(res,{
+    success:true,
+    message:"Employee registered successfully",
+    statusCode:201,
+    data:result,
   })
 })
 
@@ -86,7 +97,8 @@ const userChangePassword = catchAsync(async(req,res,next)=>{
 
 export const authControllers = {
   userLogin,
-  userRegister,
+  createCustomer,
+  createEmployee,
   userLogout,
   userForgotPassword,
   userVerifyOTP,

@@ -6,37 +6,50 @@ const getStats = async () => {
     const totalUsers = await db.user.count();
     const totalInteractions = await db.interaction.count();
 
-    // Mock chart data structure based on Figma screenshots
-    const monthlyInteractionProgress = [
-        { month: "Jan", value: 40 },
-        { month: "Feb", value: 120 },
-        { month: "Mar", value: 180 },
-        { month: "Apr", value: 450 },
-        { month: "May", value: 400 },
-        { month: "Jun", value: 500 },
-        { month: "Jul", value: 1000 },
-        { month: "Aug", value: 860 },
-        { month: "Sept", value: 620 },
-        { month: "Oct", value: 650 },
-        { month: "Nov", value: 720 },
-        { month: "Dec", value: 1300 },
-    ];
+    // Fetch all interactions to simply aggregate them by month and week locally
+    const interactions = await db.interaction.findMany({
+        select: { date: true, bookingStatus: true }
+    });
 
-    const weeklyBookingProgress = [
-        { day: "Sat", value: 0 },
-        { day: "Sun", value: 20 },
-        { day: "Mon", value: 30 },
-        { day: "Tue", value: 80 },
-        { day: "Wed", value: 70 },
-        { day: "Thu", value: 90 },
-        { day: "Fri", value: 180 },
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Initialize metrics arrays with 0
+    const monthlyInteractionProgress = monthNames.map(month => ({ month, value: 0 }));
+    const weeklyBookingProgress = dayNames.map(day => ({ day, value: 0 }));
+
+    // Aggregate real values
+    interactions.forEach((item: any) => {
+        if (!item.date) return;
+        const d = new Date(item.date);
+
+        // Month aggregation
+        const monthIndex = d.getMonth();
+        monthlyInteractionProgress[monthIndex].value += 1;
+
+        // Week aggregation (only count if they have a confirmed booking)
+        if (item.bookingStatus === "Confirmed") {
+            const dayIndex = d.getDay();
+            weeklyBookingProgress[dayIndex].value += 1;
+        }
+    });
+
+    // Rearrange weekly to start from Saturday to match previous Figma mock format
+    const arrangedWeekly = [
+        weeklyBookingProgress[6], // Sat
+        weeklyBookingProgress[0], // Sun
+        weeklyBookingProgress[1], // Mon
+        weeklyBookingProgress[2], // Tue
+        weeklyBookingProgress[3], // Wed
+        weeklyBookingProgress[4], // Thu
+        weeklyBookingProgress[5], // Fri
     ];
 
     return {
         totalUsers,
         totalInteractions,
         monthlyInteractionProgress,
-        weeklyBookingProgress,
+        weeklyBookingProgress: arrangedWeekly,
     };
 };
 

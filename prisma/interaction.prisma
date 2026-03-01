@@ -12,6 +12,8 @@ model Interaction {
   audioUrl      String?
   subject       String?
   message       String?              @db.Text
+  mobileNo      String?
+  mailAddress   String?
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
 

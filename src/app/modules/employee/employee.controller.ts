@@ -13,7 +13,7 @@ const createEmployee = catchAsync(async (req, res) => {
 });
 
 const getAllEmployees = catchAsync(async (req, res) => {
-    const result = await employeeServices.getAllEmployees();
+    const result = await employeeServices.getAllEmployees(req.query);
     sendResponse(res, {
         success: true,
         message: "Employees fetched successfully",
