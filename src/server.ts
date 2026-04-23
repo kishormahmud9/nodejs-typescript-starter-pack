@@ -2,7 +2,6 @@ import { Server } from "http";
 import app from "./app";
 import config from "./app/config";
 import { prisma } from "./app/db_connection";
-import { connectRedis } from "./app/config/redis.config";
 
 let server: Server;
 
@@ -13,7 +12,9 @@ const startServer = async () => {
     console.log(`Environment: ${config.NODE_ENV}`);
     // Start server
     server = app.listen(PORT, () => {
-      console.log(`Server running on port:- ${PORT}`);
+      console.log(`Server running on port:- ${PORT}
+http://localhost:5000/
+        `);
     });
   } catch (error) {
     console.error("❌ Failed to start server:", error);
@@ -23,7 +24,6 @@ const startServer = async () => {
 
 // Start server
 (async()=>{
-  await connectRedis();
   await startServer();
 })()
 

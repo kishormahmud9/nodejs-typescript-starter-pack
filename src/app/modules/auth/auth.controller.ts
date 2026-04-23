@@ -17,27 +17,19 @@ const userLogin = catchAsync(async(req,res,next)=>{
    })
 })
 
-const createCustomer = catchAsync(async(req,res,next)=>{
+// user register 
+const userRegister = catchAsync(async (req, res) => {
   const payload = req.body;
-  const result = await authServices.registerCustomer(payload);
-  sendResponse(res,{
-    success:true,
-    message:"Customer registered successfully",
-    statusCode:201,
-    data:result,
-  })
-})
 
-const createEmployee = catchAsync(async(req,res,next)=>{
-  const payload = req.body;
-  const result = await authServices.registerEmployee(payload);
-  sendResponse(res,{
-    success:true,
-    message:"Employee registered successfully",
-    statusCode:201,
-    data:result,
-  })
-})
+  const result = await authServices.registerUser(payload);
+
+  sendResponse(res, {
+    success: true,
+    message: "User registered successfully",
+    statusCode: 201,
+    data: result,
+  });
+});
 
 const userLogout = catchAsync(async(req,res,next)=>{
   res.clearCookie("accessToken", {
@@ -97,8 +89,7 @@ const userChangePassword = catchAsync(async(req,res,next)=>{
 
 export const authControllers = {
   userLogin,
-  createCustomer,
-  createEmployee,
+  userRegister,
   userLogout,
   userForgotPassword,
   userVerifyOTP,
